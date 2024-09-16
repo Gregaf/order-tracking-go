@@ -1,11 +1,12 @@
 package models
 
 type User struct {
-	Id            string `json:"id"`
-	FirstName     string `json:"firstName"`
-	LastName      string `json:"lastName"`
-	Email         string `json:"email"`
-	PrimaryPhone  string `json:"primaryPhone"`
-	CreatedAtDate int    `json:"createdAtDate"`
-	UpdatedAtDate int    `json:"updatedAtDate"`
+	Uid           string `json:"uid" dynamodbav:"Uid"`
+	Sub           string `json:"sub" dynamodbav:"Sub"`
+	FirstName     string `json:"firstName" dynamodbav:"FirstName"`
+	LastName      string `json:"lastName" dynamodbav:"LastName"`
+	Email         string `json:"email" dynamodbav:"Email"`
+	PrimaryPhone  string `json:"primaryPhone" dynamodbav:"PrimaryPhone"`
+	CreatedAtDate int64  `json:"createdAtDate" dynamodbav:"CreatedAtDate"`
+	UpdatedAtDate int64  `json:"updatedAtDate" dynamodbav:"UpdatedAtDate"`
 }

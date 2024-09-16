@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2authorizers"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2integrations"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
@@ -22,22 +23,32 @@ func UserServiceStack(scope constructs.Construct, id string, props *InfraStackPr
 
 	httpApi := awsapigatewayv2.NewHttpApi(stack, jsii.String("UserServiceAPI"), nil)
 
-	getUserFn := awslambda.NewFunction(stack, jsii.String("UserServiceGetUser"), &awslambda.FunctionProps{
-		FunctionName: jsii.String("UserServiceGetUser"),
+	fakeAuthorizerFn := awslambda.NewFunction(stack, jsii.String("UserServiceFakeAuthorizer"), &awslambda.FunctionProps{
+		FunctionName: jsii.String("FakeAuthorizer"),
 		Runtime:      awslambda.Runtime_PROVIDED_AL2023(),
-		Code:         awslambda.Code_FromAsset(jsii.String("../bin/user_service/routes/get_user"), nil),
+		Code:         awslambda.Code_FromAsset(jsii.String("../bin/auth_service/authorizers/fake"), nil),
 		Handler:      jsii.String("bootstrap"),
 	})
 
-	getUserIntegration := awsapigatewayv2integrations.NewHttpLambdaIntegration(jsii.String("UserServiceGetUserIntegration"), getUserFn, nil)
+	fakeAuthorizer := awsapigatewayv2authorizers.NewHttpLambdaAuthorizer(jsii.String("UserServiceFakeAuthorizer"), fakeAuthorizerFn, nil)
+
+	createUserFn := awslambda.NewFunction(stack, jsii.String("UserServiceCreateUser"), &awslambda.FunctionProps{
+		FunctionName: jsii.String("UserServiceCreateUser"),
+		Runtime:      awslambda.Runtime_PROVIDED_AL2023(),
+		Code:         awslambda.Code_FromAsset(jsii.String("../bin/user_service/routes/create_user"), nil),
+		Handler:      jsii.String("bootstrap"),
+	})
+
+	getUserIntegration := awsapigatewayv2integrations.NewHttpLambdaIntegration(jsii.String("UserServiceCreateUserIntegration"), createUserFn, nil)
 
 	httpApi.AddRoutes(&awsapigatewayv2.AddRoutesOptions{
-		Path: jsii.String("/users/{user_id}"),
+		Path: jsii.String("/users"),
 		Methods: &[]awsapigatewayv2.HttpMethod{
-			awsapigatewayv2.HttpMethod_GET,
+			awsapigatewayv2.HttpMethod_POST,
 		},
 		// TODO: Add the authorizer to the API
-		Authorizer:  nil,
+		Authorizer: fakeAuthorizer,
+
 		Integration: getUserIntegration,
 	})
 

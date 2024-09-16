@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"errors"
+	"time"
 
 	"github.com/gregaf/order-tracking/internal/models"
 	"github.com/gregaf/order-tracking/internal/repository"
@@ -21,6 +22,9 @@ func NewUserService(userRepo repository.UserRepository) *UserService {
 
 func (s *UserService) CreateUser(user *models.User) error {
 	// validate user data...
+
+	user.CreatedAtDate = time.Now().UnixMilli()
+	user.UpdatedAtDate = user.CreatedAtDate
 
 	return s.userRepo.CreateUser(user)
 }
