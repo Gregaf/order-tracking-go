@@ -20,6 +20,7 @@ func NewUserService(userRepo repository.UserRepository) *UserService {
 	return &UserService{userRepo: userRepo}
 }
 
+// TODO: Return created user...
 func (s *UserService) CreateUser(user *models.User) error {
 	// validate user data...
 

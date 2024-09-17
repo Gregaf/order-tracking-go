@@ -28,10 +28,10 @@ $(BIN_DIR)/%/bootstrap: $(ENTRY_DIR)/% $(SOURCE)
 serve: ## Start the SAM Local API
 	sam local start-api -t $(CDK_OUT) --warm-containers eager
 
-synth: build $(CDK_OUT)
+synth: build $(CDK_OUT) ## Synthesize the CDK stack
 
 $(CDK_OUT): $(INFRA_SOURCE)
-	cd infra && cdk synth -v
+	cd infra && cdk synth -v --no-staging
 
 clean: ## Remove built artifacts
 	@echo "Cleaning up..."

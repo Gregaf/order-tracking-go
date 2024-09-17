@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/gregaf/order-tracking/internal/models"
 	dynamodbrepository "github.com/gregaf/order-tracking/internal/repository/dynamodb_repository"
 	"github.com/gregaf/order-tracking/internal/transport"
 	userservice "github.com/gregaf/order-tracking/internal/user_service"
@@ -33,21 +35,28 @@ type CreateUserRequestBody struct {
 func (h *handler) handleRequest(ctx context.Context, r Request) (Response, error) {
 	h.logger.Info("Income Request Data", "event", r)
 
-	userId := r.PathParameters["user_id"]
-	if userId == "" {
-		return transport.Failure(http.StatusBadRequest, errors.New("Invalid path parameter, 'user_id' path paramter is required"))
+	data := []byte(r.Body)
+	ok := json.Valid(data)
+	if !ok {
+		return transport.Failure(400, fmt.Errorf("Invalid JSON Body, valid JSON is required in the Body"))
 	}
 
-	user, err := h.userSvc.GetUserByID(userId)
+	userDto := &CreateUserRequestBody{}
+	err := json.Unmarshal(data, userDto)
 	if err != nil {
-		return transport.Failure(http.StatusInternalServerError, err)
+		return transport.Failure(400, err)
 	}
 
-	if user == nil {
-		return transport.Success(nil, http.StatusNotFound)
+	err = h.userSvc.CreateUser(&models.User{
+		FirstName: userDto.FirstName,
+		LastName:  userDto.LastName,
+		Email:     userDto.Email,
+	})
+	if err != nil {
+		return transport.Failure(400, err)
 	}
 
-	return transport.Success(user, http.StatusOK)
+	return transport.Success("User successfully created", http.StatusCreated)
 }
 
 func main() {

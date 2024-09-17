@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -26,7 +27,7 @@ type CustomClaims struct {
 func (h *handler) handleRequest(ctx context.Context, r Request) (Response, error) {
 	h.logger.Info("Income Request Data", "event", r)
 
-	tokenString := r.Headers["Authorization"]
+	tokenString := strings.Split(r.Headers["Authorization"], " ")[1]
 	if tokenString == "" {
 		return Response{IsAuthorized: false}, nil
 	}
@@ -53,7 +54,7 @@ func (h *handler) handleRequest(ctx context.Context, r Request) (Response, error
 
 func main() {
 	h := handler{
-		logger: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
+		logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
 	}
 
 	lambda.Start(h.handleRequest)

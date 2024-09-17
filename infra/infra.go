@@ -30,7 +30,11 @@ func UserServiceStack(scope constructs.Construct, id string, props *InfraStackPr
 		Handler:      jsii.String("bootstrap"),
 	})
 
-	fakeAuthorizer := awsapigatewayv2authorizers.NewHttpLambdaAuthorizer(jsii.String("UserServiceFakeAuthorizer"), fakeAuthorizerFn, nil)
+	fakeAuthorizer := awsapigatewayv2authorizers.NewHttpLambdaAuthorizer(jsii.String("UserServiceFakeAuthorizer"), fakeAuthorizerFn, &awsapigatewayv2authorizers.HttpLambdaAuthorizerProps{
+		ResponseTypes: &[]awsapigatewayv2authorizers.HttpLambdaResponseType{
+			awsapigatewayv2authorizers.HttpLambdaResponseType_SIMPLE,
+		},
+	})
 
 	createUserFn := awslambda.NewFunction(stack, jsii.String("UserServiceCreateUser"), &awslambda.FunctionProps{
 		FunctionName: jsii.String("UserServiceCreateUser"),
@@ -39,7 +43,7 @@ func UserServiceStack(scope constructs.Construct, id string, props *InfraStackPr
 		Handler:      jsii.String("bootstrap"),
 	})
 
-	getUserIntegration := awsapigatewayv2integrations.NewHttpLambdaIntegration(jsii.String("UserServiceCreateUserIntegration"), createUserFn, nil)
+	createUserIntegration := awsapigatewayv2integrations.NewHttpLambdaIntegration(jsii.String("UserServiceCreateUserIntegration"), createUserFn, nil)
 
 	httpApi.AddRoutes(&awsapigatewayv2.AddRoutesOptions{
 		Path: jsii.String("/users"),
@@ -49,7 +53,7 @@ func UserServiceStack(scope constructs.Construct, id string, props *InfraStackPr
 		// TODO: Add the authorizer to the API
 		Authorizer: fakeAuthorizer,
 
-		Integration: getUserIntegration,
+		Integration: createUserIntegration,
 	})
 
 	return stack
