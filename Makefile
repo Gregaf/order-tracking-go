@@ -1,5 +1,7 @@
 BIN_DIR := bin
 SOURCE=$(shell find . -name "*.go" -not -path "*/infra/*")
+TEST_DIRS=$(shell find . -name "*_test.go" -not -path "*/infra/*" -printf "%h\n" | sort -u)
+
 
 INFRA_SOURCE=$(shell find ./infra -name "*.go")
 CDK_OUT := infra/cdk.out/InfraStack.template.json
@@ -13,8 +15,10 @@ BIN_PATHS := $(patsubst $(ENTRY_DIR)/%,$(BIN_DIR)/%/bootstrap,$(shell dirname $(
 lint: ## Lint the project
 	golangci-lint run -v
 
-test: ## Run all tests
-	@echo "TODO: Must implement makefile test rule"
+test: $(TEST_DIRS) ## Run all tests
+
+$(TEST_DIRS):
+	cd $@ && go test -v
 
 test-coverage: ## Run all tests and output coverage file
 	@echo "TODO: Must implement makefile test coverage rule"	

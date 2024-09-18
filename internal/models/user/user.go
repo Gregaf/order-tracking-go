@@ -5,7 +5,7 @@ type User struct {
 	Sub           string `json:"sub" dynamodbav:"Sub"`
 	FirstName     string `json:"firstName" dynamodbav:"FirstName"`
 	LastName      string `json:"lastName" dynamodbav:"LastName"`
-	Email         string `json:"email" dynamodbav:"Email"`
+	Email         Email  `json:"email" dynamodbav:"Email"`
 	PrimaryPhone  string `json:"primaryPhone" dynamodbav:"PrimaryPhone"`
 	CreatedAtDate int64  `json:"createdAtDate" dynamodbav:"CreatedAtDate"`
 	UpdatedAtDate int64  `json:"updatedAtDate" dynamodbav:"UpdatedAtDate"`
