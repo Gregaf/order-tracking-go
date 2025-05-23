@@ -12,18 +12,26 @@ BIN_DIR := $(ROOT)/bin
 BIN_NAME := bootstrap
 BIN_PATHS := $(patsubst $(ENTRY_DIR)/%,$(BIN_DIR)/%/$(BIN_NAME),$(shell dirname $(ENTRY_POINTS)))
 
+TF_ENV = dev
+TF_ROOT = $(ROOT)/terraform
+TF_BOOTSTRAP_DIR = $(TF_ROOT)/app/bootstrap
+TF_ORDER_TRACKING_DIR = $(TF_ROOT)/app/order-tracking
+
+
 .DEFAULT_GOAL := help
+
+# GO MANAGEMENT
 
 lint: ## Lint the project
 	golangci-lint run -v
 
 test: ## Run all tests
-	go test $(TEST_DIRS) -v
+	cd $(ROOT)/app && go test $(TEST_DIRS) -v
 
 test-cov: ## Run all tests and output coverage file
-	go test $(TEST_DIRS) -coverprofile=$(COVERAGE_FILE) -v
-	go tool cover -func=$(COVERAGE_FILE)	
-	go tool cover -html=$(COVERAGE_FILE)
+	cd $(ROOT)/app && go test $(TEST_DIRS) -coverprofile=$(COVERAGE_FILE) -v
+	cd $(ROOT)/app && go tool cover -func=$(COVERAGE_FILE)	
+	cd $(ROOT)/app && go tool cover -html=$(COVERAGE_FILE)
 
 build: $(BIN_PATHS) ## Build all entrypoints
 
@@ -44,13 +52,24 @@ PACKAGES := $(patsubst $(BIN_DIR)/%/$(BIN_NAME),$(DIST_DIR)/%.zip,$(BIN_PATHS))
 package: $(BUILD) $(DIST_DIR) $(PACKAGES) ## Create zip packages for all built binaries
 
 $(DIST_DIR)/%.zip: $(BIN_DIR)/%/$(BIN_NAME)
+	mkdir -p $(dir $(DIST_DIR)/$*.zip)
 	cd $(dir $<) && zip -r $(DIST_DIR)/$*.zip $(notdir $<)
 
 $(DIST_DIR):
 	mkdir -p $(DIST_DIR)
 
+# TERRAFORM MANAGEMENT
+
+bootstrap: ## Create the bootstrap backend infrastructure via terraform
+	cd $(TF_BOOTSTRAP_DIR) && terraform init
+	cd $(TF_BOOTSTRAP_DIR) && terraform apply -auto-approve -var-file=$(TF_ROOT)/envs/$(TF_ENV).tfvars 
+
+order-tracking: ## Create the order-tracking infrastructure via terraform
+	cd $(TF_ORDER_TRACKING_DIR) && terraform init
+	cd $(TF_ORDER_TRACKING_DIR) && terraform apply -auto-approve -var-file=$(TF_ROOT)/envs/$(TF_ENV).tfvars 
+
 help:  ## Display this help
-	@$(info APPLICATION NAME)
+	@$(info Order Tracking)
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 .PHONY: help clean lint test test-cov build tidy package

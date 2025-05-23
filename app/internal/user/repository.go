@@ -1,0 +1,14 @@
+package user
+
+import (
+	"context"
+
+	"github.com/gregaf/order-tracking-go/internal/models"
+)
+
+type UserRepository interface {
+	CreateUser(ctx context.Context, user models.User) error
+	GetUserByID(ctx context.Context, ID string) (*models.User, error)
+	// UpdateUser(user *models.User) error
+	DeleteUser(ctx context.Context, id string) error
+}

@@ -54,13 +54,6 @@ resource "aws_apigatewayv2_integration" "lambda_integrations" {
   integration_uri        = aws_lambda_function.functions[each.key].invoke_arn
   payload_format_version = "2.0"
   timeout_milliseconds   = 30000
-
-  response_parameters {
-    status_code = 200
-    mappings = var.enable_xray ? {
-      "append:header.X-Ray-Trace-Id" = "$context.xrayTraceId"
-    } : {}
-  }
 }
 
 resource "aws_apigatewayv2_route" "routes" {
