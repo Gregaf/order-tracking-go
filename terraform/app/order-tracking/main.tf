@@ -28,9 +28,9 @@ module "hello_world_api" {
 
   lambda_functions = {
     hello_world = {
-      handler     = "main.handler"
-      runtime     = "python3.13"
-      source_path = "${path.module}/src/hello-world/main.py"
+      handler     = "bootstrap"
+      runtime     = "provided.al2023"
+      source_path = "${path.module}/../../../dist/hello-world.zip"
     }
   }
 

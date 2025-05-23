@@ -24,6 +24,12 @@ variable "lambda_functions" {
     timeout               = optional(number, 30)
     environment_variables = optional(map(string), {})
     layers                = optional(list(string), [])
+    policy_statements = optional(list(object({
+      Effect   = string
+      Action   = list(string)
+      Resource = list(string)
+    })), [])
+    managed_policy_arns = optional(list(string), [])
   }))
 }
 
