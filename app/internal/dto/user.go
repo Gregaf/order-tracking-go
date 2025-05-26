@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/gregaf/order-tracking-go/internal/types"
+import "gregaf/order-tracking-go/internal/types"
 
 type CreateUserDTO struct {
 	FirstName string      `json:"firstName"`

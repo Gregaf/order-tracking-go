@@ -24,10 +24,26 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+func (c *CustomClaims) GetPermissions() []string {
+	if c.Permissions == nil {
+		return []string{}
+	}
+
+	return c.Permissions
+}
+
+func (c *CustomClaims) GetRole() string {
+	if len(c.Role) <= 0 {
+		return "Anonymous"
+	}
+
+	return c.Role
+}
+
 func (h *handler) handleRequest(ctx context.Context, r Request) (Response, error) {
 	h.logger.Info("Income Request Data", "event", r)
 
-	tokenString := strings.Split(r.Headers["Authorization"], " ")[1]
+	tokenString := strings.Split(r.Headers["authorization"], " ")[1]
 	if tokenString == "" {
 		return Response{IsAuthorized: false}, nil
 	}
@@ -46,8 +62,8 @@ func (h *handler) handleRequest(ctx context.Context, r Request) (Response, error
 	} else {
 
 		return Response{IsAuthorized: true, Context: map[string]interface{}{
-			"permissions": claims.Permissions,
-			"role":        claims.Role,
+			"permissions": claims.GetPermissions(),
+			"role":        claims.GetRole(),
 			"requestorID": claims.Subject,
 		}}, nil
 	}
@@ -55,8 +71,7 @@ func (h *handler) handleRequest(ctx context.Context, r Request) (Response, error
 
 func main() {
 	h := handler{
-		logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
+		logger: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
 	}
-
 	lambda.Start(h.handleRequest)
 }

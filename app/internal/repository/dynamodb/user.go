@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 
+	"gregaf/order-tracking-go/internal/models"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/gregaf/order-tracking-go/internal/models"
 )
 
 type DynamoDbUserRepository struct {

@@ -9,8 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.19.0
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression v1.7.82
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.43.1
-	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/gregaf/order-tracking-go v0.0.0-20250208172007-8a2bac95cb6c
+	github.com/golang-jwt/jwt/v5 v5.2.2
 )
 
 require (

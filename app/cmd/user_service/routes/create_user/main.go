@@ -7,16 +7,17 @@ import (
 	"net/http"
 	"os"
 
+	"gregaf/order-tracking-go/internal/dto"
+	repository "gregaf/order-tracking-go/internal/repository/dynamodb"
+	"gregaf/order-tracking-go/internal/service/core"
+	transport "gregaf/order-tracking-go/internal/transport/http"
+	"gregaf/order-tracking-go/internal/transport/http/middleware"
+	"gregaf/order-tracking-go/internal/user"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/gregaf/order-tracking-go/internal/dto"
-	repository "github.com/gregaf/order-tracking-go/internal/repository/dynamodb"
-	"github.com/gregaf/order-tracking-go/internal/service/core"
-	transport "github.com/gregaf/order-tracking-go/internal/transport/http"
-	"github.com/gregaf/order-tracking-go/internal/transport/http/middleware"
-	"github.com/gregaf/order-tracking-go/internal/user"
 )
 
 type Request = events.APIGatewayV2HTTPRequest
@@ -76,6 +77,7 @@ func (h *handler) handleRequest(ctx context.Context, r Request) (Response, error
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	dbEndpoint := os.Getenv("DB_ENDPOINT")
+	// TODO: Pass table name
 	region := os.Getenv("AWS_REGION")
 
 	logger.Info("Loaded environment variables", "dbEndpoint", dbEndpoint, "region", region)
@@ -87,7 +89,7 @@ func main() {
 
 	// logger.Info("Loaded configuration", "config", cfg)
 	repo := repository.NewDynamoDbUserRepository(logger, cfg, func(o *dynamodb.Options) {
-		o.BaseEndpoint = &dbEndpoint
+		// o.BaseEndpoint = &dbEndpoint
 		o.Region = region
 	})
 

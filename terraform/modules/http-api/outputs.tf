@@ -8,14 +8,9 @@ output "api_id" {
   value       = aws_apigatewayv2_api.http_api.id
 }
 
-output "lambda_function_names" {
-  description = "Map of created Lambda function names"
-  value       = { for k, v in aws_lambda_function.functions : k => v.function_name }
-}
-
 output "lambda_function_arns" {
   description = "Map of created Lambda function arns"
-  value       = { for k, v in aws_lambda_function.functions : k => v.arn }
+  value       = { for k, v in module.lambda_functions : k => v.arn }
 }
 
 output "api_execution_arn" {

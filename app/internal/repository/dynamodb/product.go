@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log/slog"
 
+	"gregaf/order-tracking-go/internal/models"
+	"gregaf/order-tracking-go/internal/product"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/gregaf/order-tracking-go/internal/models"
-	"github.com/gregaf/order-tracking-go/internal/product"
 )
 
 type DynamoDbProductRepository struct {
@@ -144,6 +145,7 @@ func (d *DynamoDbProductRepository) GetAllProducts(ctx context.Context, options 
 	return &product.GetProductsData{Products: products, Count: len(products)}, nil
 }
 
+// amazonq-ignore-next-line
 func (d *DynamoDbProductRepository) DeleteProductByID(ctx context.Context, id string) error {
 	panic("not implemented") // TODO: Implement
 }

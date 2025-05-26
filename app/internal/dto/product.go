@@ -1,8 +1,8 @@
 package dto
 
 import (
-	"github.com/gregaf/order-tracking-go/internal/models"
-	"github.com/gregaf/order-tracking-go/internal/types"
+	"gregaf/order-tracking-go/internal/models"
+	"gregaf/order-tracking-go/internal/types"
 )
 
 type CreateProductDTO struct {

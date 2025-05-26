@@ -2,10 +2,9 @@ package models
 
 import (
 	"fmt"
+	"gregaf/order-tracking-go/internal/util"
 	"log/slog"
 	"strings"
-
-	"github.com/gregaf/order-tracking-go/internal/util"
 )
 
 type FilterOperator string

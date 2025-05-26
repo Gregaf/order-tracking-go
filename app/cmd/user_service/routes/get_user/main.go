@@ -7,15 +7,16 @@ import (
 	"net/http"
 	"os"
 
+	repository "gregaf/order-tracking-go/internal/repository/dynamodb"
+	"gregaf/order-tracking-go/internal/service/core"
+	transport "gregaf/order-tracking-go/internal/transport/http"
+	"gregaf/order-tracking-go/internal/transport/http/middleware"
+	"gregaf/order-tracking-go/internal/user"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	repository "github.com/gregaf/order-tracking-go/internal/repository/dynamodb"
-	"github.com/gregaf/order-tracking-go/internal/service/core"
-	transport "github.com/gregaf/order-tracking-go/internal/transport/http"
-	"github.com/gregaf/order-tracking-go/internal/transport/http/middleware"
-	"github.com/gregaf/order-tracking-go/internal/user"
 )
 
 type Request = events.APIGatewayV2HTTPRequest
@@ -89,7 +90,7 @@ func main() {
 	}
 
 	repo := repository.NewDynamoDbUserRepository(logger, cfg, func(o *dynamodb.Options) {
-		o.BaseEndpoint = &dbEndpoint
+		// o.BaseEndpoint = &dbEndpoint
 		o.Region = region
 	})
 

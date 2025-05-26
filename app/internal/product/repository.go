@@ -3,7 +3,7 @@ package product
 import (
 	"context"
 
-	"github.com/gregaf/order-tracking-go/internal/models"
+	"gregaf/order-tracking-go/internal/models"
 )
 
 type ProductRepository interface {

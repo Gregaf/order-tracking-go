@@ -3,8 +3,9 @@ package dynamodbrepository
 import (
 	"fmt"
 
+	"gregaf/order-tracking-go/internal/models"
+
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
-	"github.com/gregaf/order-tracking-go/internal/models"
 )
 
 func buildFilterExpression(filters []models.FilterCriteria) (*expression.ConditionBuilder, error) {

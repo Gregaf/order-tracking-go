@@ -3,9 +3,9 @@ package user
 import (
 	"context"
 
-	"github.com/gregaf/order-tracking-go/internal/dto"
-	"github.com/gregaf/order-tracking-go/internal/models"
-	"github.com/gregaf/order-tracking-go/internal/transport/http/middleware"
+	"gregaf/order-tracking-go/internal/dto"
+	"gregaf/order-tracking-go/internal/models"
+	"gregaf/order-tracking-go/internal/transport/http/middleware"
 )
 
 type UserService interface {

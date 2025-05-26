@@ -3,7 +3,7 @@ package types
 import (
 	"net/mail"
 
-	"github.com/gregaf/order-tracking-go/internal/validation"
+	"gregaf/order-tracking-go/internal/validation"
 )
 
 type Email string

@@ -2,8 +2,7 @@ package user
 
 import (
 	"context"
-
-	"github.com/gregaf/order-tracking-go/internal/models"
+	"gregaf/order-tracking-go/internal/models"
 )
 
 type UserRepository interface {

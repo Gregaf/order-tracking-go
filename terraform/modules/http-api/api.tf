@@ -28,9 +28,12 @@ resource "aws_apigatewayv2_stage" "default" {
   name        = var.stage_name
   auto_deploy = true
 
-  #   access_log_settings {
-  #     destination_arn = aws
-  #   }
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_logs.arn
+    format          = <<EOF
+    $context.extendedRequestId $context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId
+    EOF
+  }
 }
 
 resource "aws_cloudwatch_log_group" "api_logs" {
@@ -51,17 +54,29 @@ resource "aws_apigatewayv2_integration" "lambda_integrations" {
 
   api_id                 = aws_apigatewayv2_api.http_api.id
   integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.functions[each.key].invoke_arn
+  integration_uri        = module.lambda_functions[each.key].invoke_arn
   payload_format_version = "2.0"
   timeout_milliseconds   = 30000
+}
+
+resource "aws_apigatewayv2_authorizer" "lambda_authorizer" {
+  name                              = "${var.name_prefix}-authorizer-${var.environment}"
+  api_id                            = aws_apigatewayv2_api.http_api.id
+  authorizer_type                   = "REQUEST"
+  identity_sources                  = ["$request.header.Authorization"]
+  authorizer_uri                    = var.lambda_authorizer_invoke_arn
+  authorizer_payload_format_version = "2.0"
+  enable_simple_responses           = true
 }
 
 resource "aws_apigatewayv2_route" "routes" {
   for_each = { for idx, route in var.api_routes : idx => route }
 
-  api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = each.value.route_key
-  target    = "integrations/${aws_apigatewayv2_integration.lambda_integrations[each.value.function_name].id}"
+  api_id             = aws_apigatewayv2_api.http_api.id
+  authorization_type = "CUSTOM"
+  authorizer_id      = aws_apigatewayv2_authorizer.lambda_authorizer.id
+  route_key          = each.value.route_key
+  target             = "integrations/${aws_apigatewayv2_integration.lambda_integrations[each.value.function_name].id}"
 }
 
 resource "aws_lambda_permission" "api_gateway_permissions" {
@@ -69,7 +84,16 @@ resource "aws_lambda_permission" "api_gateway_permissions" {
 
   statement_id  = "AllowExecutionFromAPIGateway-${each.key}"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.functions[each.value.function_name].function_name
+  function_name = module.lambda_functions[each.value.function_name].function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
+}
+
+// TODO: Figure out best way to add the service name without using whole prefix
+resource "aws_lambda_permission" "api_gateway_authorizer_permission" {
+  statement_id  = "AllowExecutionFromAPIGateway-${var.name_prefix}-${var.lambda_authorizer_name}"
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_authorizer_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
 }

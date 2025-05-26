@@ -14,6 +14,16 @@ variable "tags" {
   default     = {}
 }
 
+variable "lambda_authorizer_name" {
+  description = ""
+  type        = string
+}
+
+variable "lambda_authorizer_invoke_arn" {
+  description = ""
+  type        = string
+}
+
 variable "lambda_functions" {
   description = "Map of Lambda functions to create"
   type = map(object({

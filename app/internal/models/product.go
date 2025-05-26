@@ -1,6 +1,6 @@
 package models
 
-import "github.com/gregaf/order-tracking-go/internal/types"
+import "gregaf/order-tracking-go/internal/types"
 
 type Product struct {
 	ID            string       `json:"id" dynamodbav:"ID"`

@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/gregaf/order-tracking-go/internal/dto"
-	"github.com/gregaf/order-tracking-go/internal/models"
-	"github.com/gregaf/order-tracking-go/internal/product"
-	"github.com/gregaf/order-tracking-go/internal/transport/http/middleware"
-	"github.com/gregaf/order-tracking-go/internal/util"
+	"gregaf/order-tracking-go/internal/dto"
+	"gregaf/order-tracking-go/internal/models"
+	"gregaf/order-tracking-go/internal/product"
+	"gregaf/order-tracking-go/internal/transport/http/middleware"
+	"gregaf/order-tracking-go/internal/util"
 )
 
 type ProductServiceCore struct {
