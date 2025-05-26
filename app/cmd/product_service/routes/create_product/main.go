@@ -7,16 +7,17 @@ import (
 	"net/http"
 	"os"
 
+	"gregaf/order-tracking-go/internal/dto"
+	"gregaf/order-tracking-go/internal/product"
+	repository "gregaf/order-tracking-go/internal/repository/dynamodb"
+	"gregaf/order-tracking-go/internal/service/core"
+	transport "gregaf/order-tracking-go/internal/transport/http"
+	"gregaf/order-tracking-go/internal/transport/http/middleware"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/gregaf/order-tracking-go/internal/dto"
-	"github.com/gregaf/order-tracking-go/internal/product"
-	repository "github.com/gregaf/order-tracking-go/internal/repository/dynamodb"
-	"github.com/gregaf/order-tracking-go/internal/service/core"
-	transport "github.com/gregaf/order-tracking-go/internal/transport/http"
-	"github.com/gregaf/order-tracking-go/internal/transport/http/middleware"
 )
 
 type Request = events.APIGatewayV2HTTPRequest
