@@ -9,28 +9,24 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type Request = events.CognitoEventUserPoolsPreTokenGenRequestV2_0
+type Event = events.CognitoEventUserPoolsPreTokenGenV2_0
 type Response = events.CognitoEventUserPoolsPreTokenGenResponseV2_0
 
 type handler struct {
 	logger *slog.Logger
 }
 
-func (h *handler) handleRequest(ctx context.Context, r Request) (Response, error) {
-	h.logger.Info("Income Request Data", "event", r)
+func (h *handler) handleRequest(ctx context.Context, event Event) (Event, error) {
+	h.logger.Info("Income Request Data", "event", event)
 
 	customClaims := make(map[string]interface{})
 
 	customClaims["role"] = "user"
 	customClaims["permissions"] = []string{"own:user:read", "own:user:write", "own:user:delete", "own:product:read", "own:product:write"}
 
-	overrideDetails := events.ClaimsAndScopeOverrideDetailsV2_0{
-		AccessTokenGeneration: events.AccessTokenGenerationV2_0{
-			ClaimsToAddOrOverride: customClaims,
-		},
-	}
+	event.Response.ClaimsAndScopeOverrideDetails.AccessTokenGeneration.ClaimsToAddOrOverride = customClaims
 
-	return Response{ClaimsAndScopeOverrideDetails: overrideDetails}, nil
+	return event, nil
 }
 
 func main() {

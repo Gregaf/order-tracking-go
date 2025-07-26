@@ -2,6 +2,13 @@ package dto
 
 import "gregaf/order-tracking-go/internal/types"
 
+type UpsertUserDTO struct {
+	ID        string
+	FirstName string
+	LastName  string
+	Email     types.Email
+}
+
 type CreateUserDTO struct {
 	FirstName string      `json:"firstName"`
 	LastName  string      `json:"lastName"`

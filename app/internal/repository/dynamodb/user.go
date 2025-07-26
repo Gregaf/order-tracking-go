@@ -118,3 +118,29 @@ func (d *DynamoDbUserRepository) GetUserByID(ctx context.Context, ID string) (*m
 
 	return fetchedUser.ToUser(), nil
 }
+
+func (d *DynamoDbUserRepository) UpsertUser(ctx context.Context, user models.User) error {
+	r := DynamoDbUser{
+		Pk:   fmt.Sprintf("USER#%s", user.ID),
+		Sk:   "METADATA",
+		User: user,
+	}
+	av, err := attributevalue.MarshalMap(r)
+	if err != nil {
+		return fmt.Errorf("failed to marshal dynamodb record, %w", err)
+	}
+
+	input := &dynamodb.PutItemInput{
+		TableName: aws.String(USER_TABLE_NAME),
+		Item:      av,
+	}
+
+	res, err := d.db.PutItem(ctx, input)
+	if err != nil {
+		return fmt.Errorf("failed to put item in dynamodb, %w", err)
+	}
+
+	d.logger.Info("Successfully upserted user", "response", res)
+
+	return nil
+}

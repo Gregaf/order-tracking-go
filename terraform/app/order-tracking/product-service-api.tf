@@ -138,7 +138,7 @@ resource "aws_dynamodb_table" "user_service_table" {
   }
 
   point_in_time_recovery {
-    enabled = true
+    enabled = false
   }
 
   tags = {

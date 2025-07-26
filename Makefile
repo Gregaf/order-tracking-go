@@ -37,7 +37,8 @@ build: $(BIN_PATHS) ## Build all entrypoints
 
 $(BIN_DIR)/%/$(BIN_NAME): $(ENTRY_DIR)/% $(SOURCE)
 	@echo "Building $@ from $</main.go"
-	cd $(ROOT)/app && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags lambda.norpc -o $@ $</main.go	
+	@cd $(ROOT)/app && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags lambda.norpc -o $@ $</main.go
+	@md5sum $</main.go | awk '{ print $$1 }' > $@.md5
 
 tidy:
 	cd $(ROOT)/app && go mod tidy
@@ -52,8 +53,15 @@ PACKAGES := $(patsubst $(BIN_DIR)/%/$(BIN_NAME),$(DIST_DIR)/%.zip,$(BIN_PATHS))
 package: $(BUILD) $(DIST_DIR) $(PACKAGES) ## Create zip packages for all built binaries
 
 $(DIST_DIR)/%.zip: $(BIN_DIR)/%/$(BIN_NAME)
-	mkdir -p $(dir $(DIST_DIR)/$*.zip)
-	cd $(dir $<) && zip -r $(DIST_DIR)/$*.zip $(notdir $<)
+	@mkdir -p $(dir $(DIST_DIR)/$*.zip)
+	@if [ ! -f $<.md5 ] || [ ! -f $(DIST_DIR)/$*.md5 ] || ! cmp -s $<.md5 $(DIST_DIR)/$*.md5; then \
+		echo "Creating $(DIST_DIR)/$*.zip from $<"; \
+		cp $<.md5 $(DIST_DIR)/$*.md5; \
+		cd $(dir $<) && zip -r $(DIST_DIR)/$*.zip $(notdir $<); \
+	else \
+		echo "Skipping $(DIST_DIR)/$*.zip, binary unchanged."; \
+	fi
+	@echo "-------------------------------------"
 
 $(DIST_DIR):
 	mkdir -p $(DIST_DIR)
@@ -76,4 +84,4 @@ help:  ## Display this help
 	@$(info Order Tracking)
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-.PHONY: help clean lint test test-cov build tidy package
+.PHONY: help clean lint test test-cov build tidy package build

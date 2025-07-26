@@ -24,6 +24,29 @@ func NewUserService(logger *slog.Logger, userRepo user.UserRepository) *UserServ
 	return &UserServiceCore{userRepo: userRepo, logger: logger}
 }
 
+func (s *UserServiceCore) Upsert(ctx context.Context, authCtx middleware.AuthContext, userDto dto.UpsertUserDTO) (*models.User, error) {
+	if userDto.ID == "" {
+		return nil, errors.New("user ID cannot be empty")
+	}
+
+	updatedAtDate := time.Now().UnixMilli()
+
+	user := models.User{
+		ID:            userDto.ID,
+		FirstName:     userDto.FirstName,
+		LastName:      userDto.LastName,
+		Email:         userDto.Email,
+		UpdatedAtDate: updatedAtDate,
+	}
+
+	err := s.userRepo.UpsertUser(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (s *UserServiceCore) CreateUser(ctx context.Context, authCtx middleware.AuthContext, userDto dto.CreateUserDTO) (*models.User, error) {
 	errValidation := userDto.Validate()
 	if errValidation != nil {

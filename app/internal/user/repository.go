@@ -6,6 +6,7 @@ import (
 )
 
 type UserRepository interface {
+	UpsertUser(ctx context.Context, user models.User) error
 	CreateUser(ctx context.Context, user models.User) error
 	GetUserByID(ctx context.Context, ID string) (*models.User, error)
 	// UpdateUser(user *models.User) error

@@ -16,3 +16,14 @@ variable "environment" {
     error_message = "Environment must be one of: dev, staging, prod"
   }
 }
+
+variable "google_client_id" {
+  description = "Google Client ID for OAuth"
+  type        = string
+}
+
+variable "google_client_secret" {
+  description = "Google Client Secret for OAuth"
+  type        = string
+  sensitive   = true
+}
