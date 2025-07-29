@@ -81,8 +81,6 @@ resource "aws_cognito_user_pool_client" "this" {
     "ALLOW_REFRESH_TOKEN_AUTH",
     "ALLOW_USER_PASSWORD_AUTH"
   ]
-
-
 }
 
 resource "aws_cognito_identity_provider" "google_provider" {

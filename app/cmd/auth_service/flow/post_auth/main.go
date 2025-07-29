@@ -29,7 +29,7 @@ func (h *handler) handleRequest(ctx context.Context, event Event) (Event, error)
 
 	upsertDto := dto.UpsertUserDTO{
 		ID:        event.UserName,
-		FirstName: event.Request.UserAttributes["given_name"],
+		FirstName: event.Request.UserAttributes["name"],
 		LastName:  event.Request.UserAttributes["family_name"],
 		Email:     types.Email(event.Request.UserAttributes["email"]),
 	}
