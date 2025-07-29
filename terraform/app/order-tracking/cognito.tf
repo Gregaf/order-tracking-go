@@ -69,18 +69,20 @@ resource "aws_cognito_user_pool_client" "this" {
     access_token  = "hours"
     id_token      = "hours"
   }
-
-  allowed_oauth_flows          = ["code"]
-  allowed_oauth_scopes         = ["phone", "email", "openid", "profile"]
-  callback_urls                = ["http://localhost:3000/"]
-  logout_urls                  = ["http://localhost:3000/logout/"]
-  supported_identity_providers = ["COGNITO", "GOOGLE"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_scopes                 = ["phone", "email", "openid", "profile"]
+  callback_urls                        = ["http://localhost:5173/callback"]
+  logout_urls                          = ["http://localhost:5173/logout"]
+  supported_identity_providers         = ["COGNITO"]
 
   explicit_auth_flows = [
     "ALLOW_USER_SRP_AUTH",
     "ALLOW_REFRESH_TOKEN_AUTH",
     "ALLOW_USER_PASSWORD_AUTH"
   ]
+
+
 }
 
 resource "aws_cognito_identity_provider" "google_provider" {
@@ -104,6 +106,8 @@ resource "aws_cognito_identity_provider" "google_provider" {
 resource "aws_cognito_user_pool_domain" "this" {
   domain       = "${var.project_name}-${var.environment}"
   user_pool_id = aws_cognito_user_pool.this.id
+
+  managed_login_version = 2
 }
 
 module "pre_token_lambda" {
@@ -144,4 +148,13 @@ module "post_auth_lambda" {
   handler       = "bootstrap"
   runtime       = "provided.al2023"
   source_path   = "${path.module}/../../../dist/auth_service/flow/post_auth.zip"
+  policy_statements = [
+    {
+      Effect = "Allow"
+      Action = ["dynamodb:PutItem"]
+      Resource = [
+        aws_dynamodb_table.user_service_table.arn
+      ]
+    }
+  ]
 }
