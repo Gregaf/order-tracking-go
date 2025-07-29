@@ -2,7 +2,7 @@ package dto
 
 import "gregaf/order-tracking-go/internal/types"
 
-type UpsertUserDTO struct {
+type SyncUserDTO struct {
 	ID        string
 	FirstName string
 	LastName  string

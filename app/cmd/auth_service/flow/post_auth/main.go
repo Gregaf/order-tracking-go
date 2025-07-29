@@ -5,7 +5,6 @@ import (
 	"gregaf/order-tracking-go/internal/dto"
 	dynamodbrepository "gregaf/order-tracking-go/internal/repository/dynamodb"
 	"gregaf/order-tracking-go/internal/service/core"
-	"gregaf/order-tracking-go/internal/transport/http/middleware"
 	"gregaf/order-tracking-go/internal/types"
 	"gregaf/order-tracking-go/internal/user"
 	"log/slog"
@@ -27,14 +26,14 @@ type handler struct {
 func (h *handler) handleRequest(ctx context.Context, event Event) (Event, error) {
 	h.logger.Info("Income Request Data", "event", event)
 
-	upsertDto := dto.UpsertUserDTO{
+	upsertDto := dto.SyncUserDTO{
 		ID:        event.UserName,
 		FirstName: event.Request.UserAttributes["name"],
 		LastName:  event.Request.UserAttributes["family_name"],
 		Email:     types.Email(event.Request.UserAttributes["email"]),
 	}
 
-	res, err := h.userSvc.Upsert(ctx, middleware.AuthContext{Role: "Fake", RequestorID: "Fake", Permissions: []string{"Fake"}}, upsertDto)
+	res, err := h.userSvc.SyncUser(ctx, upsertDto)
 	if err != nil {
 		h.logger.Error("Failed to upsert user", "error", err)
 		return event, err

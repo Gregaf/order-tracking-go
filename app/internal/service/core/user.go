@@ -24,22 +24,25 @@ func NewUserService(logger *slog.Logger, userRepo user.UserRepository) *UserServ
 	return &UserServiceCore{userRepo: userRepo, logger: logger}
 }
 
-func (s *UserServiceCore) Upsert(ctx context.Context, authCtx middleware.AuthContext, userDto dto.UpsertUserDTO) (*models.User, error) {
-	if userDto.ID == "" {
-		return nil, errors.New("user ID cannot be empty")
-	}
+func (s *UserServiceCore) SyncUser(ctx context.Context, userDto dto.SyncUserDTO) (*models.User, error) {
 
 	updatedAtDate := time.Now().UnixMilli()
+	displayID, err := generateDisplayID(userDto.FirstName, userDto.LastName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate display ID: %w", err)
+	}
 
 	user := models.User{
 		ID:            userDto.ID,
+		DisplayID:     displayID,
 		FirstName:     userDto.FirstName,
 		LastName:      userDto.LastName,
 		Email:         userDto.Email,
+		CreatedAtDate: updatedAtDate,
 		UpdatedAtDate: updatedAtDate,
 	}
 
-	err := s.userRepo.UpsertUser(ctx, user)
+	err = s.userRepo.SyncUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}

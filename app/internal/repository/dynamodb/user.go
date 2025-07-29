@@ -9,7 +9,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 type DynamoDbUserRepository struct {
@@ -119,28 +121,46 @@ func (d *DynamoDbUserRepository) GetUserByID(ctx context.Context, ID string) (*m
 	return fetchedUser.ToUser(), nil
 }
 
-func (d *DynamoDbUserRepository) UpsertUser(ctx context.Context, user models.User) error {
-	r := DynamoDbUser{
-		Pk:   fmt.Sprintf("USER#%s", user.ID),
-		Sk:   "METADATA",
-		User: user,
-	}
-	av, err := attributevalue.MarshalMap(r)
+func (d *DynamoDbUserRepository) SyncUser(ctx context.Context, user models.User) error {
+	update := expression.Set(
+		expression.Name("FirstName"), expression.Value(user.FirstName),
+	).Set(
+		expression.Name("Email"), expression.Value(user.Email),
+	).Set(
+		expression.Name("UpdatedAtDate"), expression.Value(user.UpdatedAtDate),
+	).Set(
+		expression.Name("DisplayID"), expression.IfNotExists(
+			expression.Name("DisplayID"),
+			expression.Value(user.DisplayID),
+		),
+	).Set(
+		expression.Name("CreatedAtDate"), expression.IfNotExists(
+			expression.Name("CreatedAtDate"),
+			expression.Value(user.CreatedAtDate),
+		),
+	)
+
+	expr, err := expression.NewBuilder().WithUpdate(update).Build()
 	if err != nil {
-		return fmt.Errorf("failed to marshal dynamodb record, %w", err)
+		return fmt.Errorf("failed to build expression: %w", err)
 	}
 
-	input := &dynamodb.PutItemInput{
+	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String(USER_TABLE_NAME),
-		Item:      av,
+		Key: map[string]types.AttributeValue{
+			"Pk": &types.AttributeValueMemberS{Value: fmt.Sprintf("USER#%s", user.ID)},
+			"Sk": &types.AttributeValueMemberS{Value: "METADATA"},
+		},
+		UpdateExpression:          expr.Update(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
 	}
 
-	res, err := d.db.PutItem(ctx, input)
+	res, err := d.db.UpdateItem(ctx, input)
 	if err != nil {
-		return fmt.Errorf("failed to put item in dynamodb, %w", err)
+		return fmt.Errorf("failed to update item in dynamodb: %w", err)
 	}
 
-	d.logger.Info("Successfully upserted user", "response", res)
-
+	d.logger.Info("Successfully synced user", "response", res)
 	return nil
 }
